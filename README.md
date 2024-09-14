@@ -22,7 +22,7 @@ This is an application that uses machine learning to recognize and classify car 
 
 FastAPI is a modern, high-performance web framework for building APIs with Python 3.7+ based on standard Python type hints. One of the standout features of FastAPI is the automatic interactive API documentation via Swagger UI.
 
-![Example Image](./static/images/fastapi.png)
+![Example Image](./static/fastapi.png)
 
 
 ## Python Modules
@@ -52,7 +52,7 @@ SonarQube has been integrated with the application in two ways:
 1. Docker Compose: A SonarQube container has been included in the Docker Compose setup, along with a PostgreSQL container for storing SonarQube data.
 2. Kubernetes: SonarQube and PostgreSQL pods have been deployed on Kubernetes to enable code analysis and quality checks.
 
-![Example Image](./static/images/sonarqube.png)
+![Example Image](./static/sonarqube.png)
 
 
 ## GitLab
