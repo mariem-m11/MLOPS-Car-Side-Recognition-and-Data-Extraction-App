@@ -1,0 +1,6 @@
+venv
+model
+mlruns
+static
+app/final_model.h5
+ocr

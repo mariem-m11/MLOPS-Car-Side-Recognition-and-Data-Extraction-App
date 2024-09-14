@@ -1,0 +1,60 @@
+stages:
+  - test
+  - sonarqube
+  - build
+  - deploy
+  - monitor
+
+pytest_job:
+  stage: test
+  image: python:3.9-slim-buster
+  script:
+    - pip install -r requirements.txt
+    - pytest test.py
+
+sonarqube_job:
+  stage: sonarqube
+  image: sonarsource/sonar-scanner-cli:latest
+  variables:
+    SONAR_TOKEN: <sonarqube-token>
+    SONAR_HOST_URL: <sonarqube-url>
+  script:
+    - sonar-scanner
+
+build_job:
+  needs:
+    - pytest_job
+    - sonarqube_job
+  stage: build
+  image: docker:20.10.16
+  services:
+    - docker:20.10.16-dind
+  before_script:
+    - docker login -u $REGISTRY_USER -p $REGISTRY_PASS
+  script:
+    - docker build -t $FRONT_IMAGE_NAME:$FRONT_IMAGE_TAG .
+    - docker push $FRONT_IMAGE_NAME:$FRONT_IMAGE_TAG
+    - docker build -t $BACK_IMAGE_NAME:$BACK_IMAGE_TAG .
+    - docker push $BACK_IMAGE_NAME:$BACK_IMAGE_TAG
+
+deploy_job:
+  needs:
+    - build_job
+  stage: deploy
+  image: bitnami/kubectl:1.27.3-debian-11-r6
+  script:
+    - kubectl apply -f kubernetes/
+
+
+mlflow_job:
+  stage: monitor
+  image: ubuntu/mlflow:2.1.1_1.0-22.04
+  variables:
+    MLFLOW_TRACKING_URI: "http://gitlab-endpoint/api/v4/projects/project_id/ml/mlflow"
+    MLFLOW_TRACKING_TOKEN: "access-token"
+  script:
+    - mlflow server --host 0.0.0.0
+
+
+#https://docs.gitlab.com/ee/user/project/integrations/mlflow_client.html
+
